@@ -1,0 +1,9 @@
+---
+applications:
+- name: jsmon
+  memory: 1024M
+  instances: 1
+  host: jsmon
+  domain: cfapps.io
+  path: .
+  command: java -jar ./spring/lib/*.jar run --cp . --local app.groovy -- --server.port=$PORT
