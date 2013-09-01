@@ -9,7 +9,7 @@ monitor.updateTable = function(element, data) {
 		var result = [];
 		var i = 0;
 	    for (var item in data) {
-	        if (!/.*\.ws\./.test(data[item].name)) {
+	        if (!/.*\.stomp\./.test(data[item].name)) {
 	        	result[i++] = data[item]
 	        } else {
 	        	console.log("Not showing: " + JSON.stringify(data[item]))
@@ -55,20 +55,15 @@ monitor.open = function(ws,metrics) {
 	if (!element) {
 	    return
     }
+	monitor.staticUpdate(element, metrics);
     monitor.socket = new SockJS(ws);
     var client = Stomp.over(monitor.socket);
     client.connect('guest', 'guest', function(frame) {
 	    console.log('Connected ' + frame);
-	    client.subscribe("/topic/metrics", function(message) {
-		    monitor.updateTable(element, JSON.parse(message.body));
-	    });
 	    client.subscribe("/topic/metrics/*", function(message) {
             var data = JSON.parse(message.body);
 		    monitor.updateRow($('#' + data.name.replace(/\./g,'\\.')), data);
 	    });
-    }, function(error) {
-	    console.log('Falling back to $.get');
-	    monitor.staticUpdate(element, metrics);
     });
 }
 
@@ -76,5 +71,5 @@ var socket = null;
 $(window).load(function() {
 	$.Mustache.add('monitorTable', $('#monitorTable').html() || monitor.table);
 	$.Mustache.add('monitorRow', $('#monitorRow').html() || monitor.row);
-	monitor.open("/ws", "/metrics");
+	monitor.open("/stomp", "/metrics");
 })
